@@ -1,0 +1,187 @@
+---
+layout: page
+title: Project Dashboard
+full-width: true
+css:
+  - "/assets/css/dashboard.css"
+ext-js:
+  - "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"
+  - "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+js:
+  - "/assets/js/dashboard.js"
+---
+
+<div class="dashboard-toolbar">
+  <div class="left">
+    <label class="mr-2 mb-0 font-weight-bold" for="projectSelect">Project</label>
+    <select id="projectSelect" class="form-control"></select>
+    <button id="addProjectBtn" class="btn btn-outline-primary">New Project</button>
+  </div>
+  <div class="right">
+    <button id="addTaskBtn" class="btn btn-primary">New Task</button>
+    <button id="exportBtn" class="btn btn-outline-secondary">Export</button>
+    <button id="importBtn" class="btn btn-outline-secondary">Import</button>
+    <input type="file" id="importFile" accept="application/json" hidden />
+  </div>
+</div>
+
+<div class="stats-cards">
+  <div class="stats-card">
+    <span class="dot status-backlog"></span>
+    <div>
+      <div class="text-uppercase small text-muted">Backlog</div>
+      <div id="countBacklog" class="value">0</div>
+    </div>
+  </div>
+  <div class="stats-card">
+    <span class="dot status-inprogress"></span>
+    <div>
+      <div class="text-uppercase small text-muted">In Progress</div>
+      <div id="countInProgress" class="value">0</div>
+    </div>
+  </div>
+  <div class="stats-card">
+    <span class="dot status-review"></span>
+    <div>
+      <div class="text-uppercase small text-muted">Review</div>
+      <div id="countReview" class="value">0</div>
+    </div>
+  </div>
+  <div class="stats-card">
+    <span class="dot status-done"></span>
+    <div>
+      <div class="text-uppercase small text-muted">Done</div>
+      <div id="countDone" class="value">0</div>
+    </div>
+  </div>
+</div>
+
+<div class="chart-wrap mb-3">
+  <canvas id="statusChart" height="120"></canvas>
+</div>
+
+<div class="kanban-board">
+  <div class="kanban-columns">
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <div class="font-weight-bold">Backlog</div>
+        <div class="kanban-count"><span class="status-dot status-backlog"></span></div>
+      </div>
+      <div id="listBacklog" class="kanban-list"></div>
+    </div>
+
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <div class="font-weight-bold">In Progress</div>
+        <div class="kanban-count"><span class="status-dot status-inprogress"></span></div>
+      </div>
+      <div id="listInProgress" class="kanban-list"></div>
+    </div>
+
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <div class="font-weight-bold">Review</div>
+        <div class="kanban-count"><span class="status-dot status-review"></span></div>
+      </div>
+      <div id="listReview" class="kanban-list"></div>
+    </div>
+
+    <div class="kanban-column">
+      <div class="kanban-column-header">
+        <div class="font-weight-bold">Done</div>
+        <div class="kanban-count"><span class="status-dot status-done"></span></div>
+      </div>
+      <div id="listDone" class="kanban-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="taskForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="taskModalLabel">Task</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="taskId" />
+          <div class="form-group">
+            <label for="taskProject">Project</label>
+            <select id="taskProject" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label for="taskTitle">Title</label>
+            <input type="text" id="taskTitle" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="taskDescription">Description</label>
+            <textarea id="taskDescription" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="taskAssignee">Assignee</label>
+              <input type="text" id="taskAssignee" class="form-control" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority" class="form-control">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="taskDueDate">Due date</label>
+              <input type="date" id="taskDueDate" class="form-control" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="taskStatus">Status</label>
+              <select id="taskStatus" class="form-control">
+                <option value="backlog">Backlog</option>
+                <option value="inprogress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Project Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="projectModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="projectForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="projectModalLabel">New Project</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="projectName">Project name</label>
+            <input type="text" id="projectName" class="form-control" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
